@@ -1,0 +1,39 @@
+{
+    "cli": true,
+    "target": "directory",
+    "adapterName": "devicemanager",
+    "title": "Device Manager",
+    "description": "Device Manager",
+    "keywords": [
+        "device control"
+    ],
+    "expert": "yes",
+    "features": [
+        "adapter"
+    ],
+    "adminFeatures": [],
+    "type": "logic",
+    "startMode": "daemon",
+    "connectionType": "local",
+    "dataSource": "poll",
+    "connectionIndicator": "no",
+    "language": "TypeScript",
+    "nodeVersion": "20",
+    "adminUi": "json",
+    "tools": [
+        "ESLint"
+    ],
+    "releaseScript": "yes",
+    "devServer": "no",
+    "indentation": "Space (4)",
+    "quotes": "single",
+    "authorName": "Thorsten Stueben",
+    "authorGithub": "schmupu",
+    "authorEmail": "thorsten@stueben.de",
+    "gitRemoteProtocol": "HTTPS",
+    "gitCommit": "no",
+    "defaultBranch": "main",
+    "license": "MIT License",
+    "dependabot": "yes",
+    "creatorVersion": "2.6.5"
+}
