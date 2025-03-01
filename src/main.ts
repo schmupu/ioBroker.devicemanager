@@ -10,7 +10,6 @@ import * as utils from '@iobroker/adapter-core';
 // import * as fs from "fs";
 
 class Devicemanager extends utils.Adapter {
-
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
@@ -31,8 +30,8 @@ class Devicemanager extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
+        this.log.info(`config option1: ${this.config.option1}`);
+        this.log.info(`config option2: ${this.config.option2}`);
 
         /*
         For every state in the system there has to be also an object of type state
@@ -70,18 +69,24 @@ class Devicemanager extends utils.Adapter {
         await this.setStateAsync('testVariable', { val: true, ack: true });
 
         // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
+        await this.setStateAsync('testVariable', {
+            val: true,
+            ack: true,
+            expire: 30,
+        });
 
         // examples for the checkPassword/checkGroup functions
         let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
+        this.log.info(`check user admin pw iobroker: ${result}`);
 
         result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+        this.log.info(`check group user admin group admin: ${result}`);
     }
 
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
+     *
+     * @param callback callback
      */
     private onUnload(callback: () => void): void {
         try {
@@ -92,6 +97,7 @@ class Devicemanager extends utils.Adapter {
             // clearInterval(interval1);
 
             callback();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             callback();
         }
@@ -114,6 +120,9 @@ class Devicemanager extends utils.Adapter {
 
     /**
      * Is called if a subscribed state changes
+     *
+     * @param id id
+     * @param state state
      */
     private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
         if (state) {
@@ -141,7 +150,6 @@ class Devicemanager extends utils.Adapter {
     //         }
     //     }
     // }
-
 }
 
 if (require.main !== module) {

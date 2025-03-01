@@ -36,8 +36,8 @@ class Devicemanager extends utils.Adapter {
    * Is called when databases are connected and adapter received configuration.
    */
   async onReady() {
-    this.log.info("config option1: " + this.config.option1);
-    this.log.info("config option2: " + this.config.option2);
+    this.log.info(`config option1: ${this.config.option1}`);
+    this.log.info(`config option2: ${this.config.option2}`);
     await this.setObjectNotExistsAsync("testVariable", {
       type: "state",
       common: {
@@ -52,14 +52,20 @@ class Devicemanager extends utils.Adapter {
     this.subscribeStates("testVariable");
     await this.setStateAsync("testVariable", true);
     await this.setStateAsync("testVariable", { val: true, ack: true });
-    await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
+    await this.setStateAsync("testVariable", {
+      val: true,
+      ack: true,
+      expire: 30
+    });
     let result = await this.checkPasswordAsync("admin", "iobroker");
-    this.log.info("check user admin pw iobroker: " + result);
+    this.log.info(`check user admin pw iobroker: ${result}`);
     result = await this.checkGroupAsync("admin", "admin");
-    this.log.info("check group user admin group admin: " + result);
+    this.log.info(`check group user admin group admin: ${result}`);
   }
   /**
    * Is called when adapter shuts down - callback has to be called under any circumstances!
+   *
+   * @param callback callback
    */
   onUnload(callback) {
     try {
@@ -84,6 +90,9 @@ class Devicemanager extends utils.Adapter {
   // }
   /**
    * Is called if a subscribed state changes
+   *
+   * @param id id
+   * @param state state
    */
   onStateChange(id, state) {
     if (state) {
