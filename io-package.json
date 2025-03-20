@@ -43,12 +43,8 @@
             "uk": "Менеджер пристроїв",
             "zh-cn": "装置经理"
         },
-        "authors": [
-            "Thorsten Stueben <thorsten@stueben.de>"
-        ],
-        "keywords": [
-            "device control"
-        ],
+        "authors": ["Thorsten Stueben <thorsten@stueben.de>"],
+        "keywords": ["device control"],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
@@ -65,6 +61,9 @@
         "compact": true,
         "connectionType": "local",
         "dataSource": "poll",
+        "supportedMessages": {
+            "custom": true
+        },
         "adminUI": {
             "config": "json"
         },
@@ -80,8 +79,9 @@
         ]
     },
     "native": {
-        "option1": true,
-        "option2": "42"
+        "pollInterval": "5",
+        "simulation": false,
+        "holiday": "HH"
     },
     "objects": [],
     "instanceObjects": []

@@ -1,16 +1,62 @@
 {
     "i18n": true,
-    "type": "panel",
+    "type": "tabs",
     "items": {
-        "option1": {
-            "type": "checkbox",
-            "label": "option1",
-            "newLine": true
-        },
-        "option2": {
-            "type": "text",
-            "label": "option2",
-            "newLine": true
+        "_options": {
+            "type": "panel",
+            "label": "Main Settings",
+            "items": {
+                "holiday": {
+                    "type": "select",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "xs": 12,
+                    "help": "Holiday",
+                    "tooltip": "Holiday",
+                    "options": [
+                        { "value": "BW", "label": "Baden-Würtemberg" },
+                        { "value": "BY", "label": "Bayern" },
+                        { "value": "BE", "label": "Berlin" },
+                        { "value": "BB", "label": "Brandenburg" },
+                        { "value": "HB", "label": "Bremen" },
+                        { "value": "HH", "label": "Hamburg" },
+                        { "value": "HE", "label": "Hessen" },
+                        { "value": "MV", "label": "Mecklenburg-vorpommern" },
+                        { "value": "NI", "label": "Niedersachsen" },
+                        { "value": "NW", "label": "Nordrhein-Westfalen" },
+                        { "value": "RP", "label": "Rheinland-Pfalz" },
+                        { "value": "SL", "label": "Saarland" },
+                        { "value": "SN", "label": "Sachsen" },
+                        { "value": "ST", "label": "Sachsen-Anhalt" },
+                        { "value": "SH", "label": "Schleswig-Holstein" },
+                        { "value": "TH", "label": "Thüringen" }
+                    ]
+                },
+                "pollInterval": {
+                    "newLine": true,
+                    "type": "number",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "xs": 12,
+                    "help": "Time of Polling in sec.",
+                    "tooltip": "Time of Polling in sec."
+                },
+                "simulation": {
+                    "newLine": true,
+                    "type": "checkbox",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "xs": 12,
+                    "label": "Simulation",
+                    "tooltip": "Simulation"
+                }
+            }
         }
     }
 }

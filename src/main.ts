@@ -5,20 +5,48 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
+import type { ifruleset } from './lib/rules';
+// eslint-disable-next-line no-duplicate-imports
+import { Rulesets } from './lib/rules';
 
 // Load your modules here, e.g.:
 // import * as fs from "fs";
 
+/**
+ * Wait (sleep) x seconds
+ *
+ * @param seconds time in seconds
+ * @returns void
+ */
+export function wait(seconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
+/**
+ * Error Message
+ *
+ * @param error error
+ * @returns Message
+ */
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return String(error);
+}
+
 class Devicemanager extends utils.Adapter {
+    private rulessets: Rulesets | undefined;
+
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
             name: 'devicemanager',
         });
         this.on('ready', this.onReady.bind(this));
-        this.on('stateChange', this.onStateChange.bind(this));
+        // this.on('stateChange', this.onStateChange.bind(this));
         // this.on('objectChange', this.onObjectChange.bind(this));
-        // this.on('message', this.onMessage.bind(this));
+        this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
     }
 
@@ -26,61 +54,29 @@ class Devicemanager extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     private async onReady(): Promise<void> {
-        // Initialize your adapter here
-
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info(`config option1: ${this.config.option1}`);
-        this.log.info(`config option2: ${this.config.option2}`);
-
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
-        await this.setObjectNotExistsAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
-
-        // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
-        // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-        // this.subscribeStates('lights.*');
-        // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-        // this.subscribeStates('*');
-
-        /*
-            setState examples
-            you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
-
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
-
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', {
-            val: true,
-            ack: true,
-            expire: 30,
-        });
-
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info(`check user admin pw iobroker: ${result}`);
-
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info(`check group user admin group admin: ${result}`);
+        if (!this.config.simulation) {
+            this.log.info(`Starting Adapter ${this.namespace} in version ${this.version}`);
+        } else {
+            this.log.info(`Starting Adapter ${this.namespace} in version ${this.version} in simulation mode`);
+        }
+        const coordinate = await this.getCoordnatesAsync();
+        if (!this.rulessets) {
+            this.rulessets = new Rulesets(coordinate, this);
+            await this.rulessets.listenStates();
+        }
+        const rules = await this.getStatesOfAsync(`${this.namespace}.rules`);
+        for (const rule of rules) {
+            if (rule._id.endsWith('ruleset')) {
+                try {
+                    const regel = (await this.getForeignStateAsync(rule._id))?.val?.toString();
+                    if (regel) {
+                        await this.rulessets.add(JSON.parse(regel));
+                    }
+                } catch (err) {
+                    this.log.error(`Error starting rulesets: ${getErrorMessage(err)}`);
+                }
+            }
+        }
     }
 
     /**
@@ -90,33 +86,12 @@ class Devicemanager extends utils.Adapter {
      */
     private onUnload(callback: () => void): void {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
-
             callback();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
             callback();
         }
     }
-
-    // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-    // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-    // /**
-    //  * Is called if a subscribed object changes
-    //  */
-    // private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-    //     if (obj) {
-    //         // The object was changed
-    //         this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-    //     } else {
-    //         // The object was deleted
-    //         this.log.info(`object ${id} deleted`);
-    //     }
-    // }
 
     /**
      * Is called if a subscribed state changes
@@ -134,22 +109,174 @@ class Devicemanager extends utils.Adapter {
         }
     }
 
-    // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-    // /**
-    //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-    //  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-    //  */
-    // private onMessage(obj: ioBroker.Message): void {
-    //     if (typeof obj === 'object' && obj.message) {
-    //         if (obj.command === 'send') {
-    //             // e.g. send email or pushover or whatever
-    //             this.log.info('send command');
+    /**
+     * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+     * Using this method requires "common.messagebox" property to be set to true in io-package.json
+     *
+     * @param obj ivhwxr
+     */
+    private async onMessage(obj: ioBroker.Message): Promise<void> {
+        if (!this.rulessets) {
+            const coordinate = await this.getCoordnatesAsync();
+            this.rulessets = this.rulessets ? this.rulessets : new Rulesets(coordinate, this);
+            await this.rulessets.listenStates();
+        }
+        if (typeof obj === 'object' && obj.message) {
+            switch (obj.command) {
+                case 'add': {
+                    if (obj.message) {
+                        this.log.info(`Add Rule : ${obj.message.rulename}`);
+                        await this.addObjectAsync(obj.message);
+                        await this.rulessets.add(obj.message);
+                    }
+                    this.sendTo(obj.from, obj.command, `Add Rule ${obj.message.rulename}`, obj.callback);
+                    break;
+                }
+                case 'delete': {
+                    const rulename = typeof obj.message === 'string' ? obj.message : obj.message.rulename;
+                    this.log.info(`Delete Rule : ${rulename}`);
+                    this.rulessets.del(rulename);
+                    await this.deleteObjectAsync(rulename);
+                    this.sendTo(obj.from, obj.command, `Delete Rule ${rulename}`, obj.callback);
+                    break;
+                }
+                default: {
+                    this.sendTo(obj.from, obj.command, `Command ${obj.command} unknown`, obj.callback);
+                }
+            }
+        } else {
+            this.sendTo(obj.from, obj.command, `Command ${obj.command} unknown`, obj.callback);
+        }
+    }
 
-    //             // Send response in callback if required
-    //             if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-    //         }
-    //     }
-    // }
+    private async getCoordnatesAsync(): Promise<{ latitude: number; longitude: number }> {
+        try {
+            const states: any = await this.getForeignObjectAsync('system.config');
+            if (
+                states &&
+                states.common &&
+                states.common.latitude !== undefined &&
+                states.common.longitude !== undefined
+            ) {
+                return { latitude: states.common.latitude, longitude: states.common.longitude };
+            }
+            throw new Error(`Could not get coordinates!`);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+            throw new Error(`Could not get coordinates!`);
+        }
+    }
+
+    private async deleteObjectAsync(rulename: string): Promise<void> {
+        try {
+            const id =
+                rulename === '*'
+                    ? `${this.namespace}.rules`
+                    : `${this.namespace}.rules.${rulename.replace(/[^0-9a-zA-Z]/g, '')}`;
+            await this.delObjectAsync(id, { recursive: true });
+        } catch (err) {
+            this.log.error(`Error deleting Objects in ${rulename}: ${getErrorMessage(err)}`);
+        }
+    }
+
+    private async addObjectAsync(ruleset: ifruleset): Promise<void> {
+        try {
+            const id = `${this.namespace}.rules.${ruleset.rulename.replace(/[^0-9a-zA-Z]/g, '')}`;
+            await this.setObjectNotExistsAsync(`${id}.rulename`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Rulename`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.setState(`${id}.rulename`, { val: ruleset.rulename, ack: true });
+            await this.setObjectNotExistsAsync(`${id}.active`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Active`,
+                    type: 'boolean',
+                    role: 'value',
+                    read: true,
+                    write: true,
+                },
+                native: {},
+            });
+            await this.setState(`${id}.active`, { val: ruleset.active, ack: true });
+            await this.setObjectNotExistsAsync(`${id}.ruleset`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Ruleset`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: true,
+                },
+                native: {},
+            });
+            await this.setState(`${id}.ruleset`, { val: JSON.stringify(ruleset), ack: true });
+            await this.setObjectNotExistsAsync(`${id}.rule`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Rule`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.setObjectNotExistsAsync(`${id}.value`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Value`,
+                    type: 'mixed',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.setObjectNotExistsAsync(`${id}.id`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Id`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.setObjectNotExistsAsync(`${id}.query`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Sandbox Query`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.setObjectNotExistsAsync(`${id}.context`, {
+                type: 'state',
+                common: {
+                    name: `${ruleset.rulename} - Sandbox Context`,
+                    type: 'string',
+                    role: 'value',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+        } catch (err) {
+            this.log.error(`Error creating Objects in ${ruleset.rulename}: ${getErrorMessage(err)}`);
+        }
+    }
 }
 
 if (require.main !== module) {
