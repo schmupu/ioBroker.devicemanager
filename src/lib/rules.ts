@@ -2,6 +2,8 @@ import vm from 'node:vm';
 import SunCalc from 'suncalc';
 import { Holidays } from './holiday';
 
+declare module 'suncalc' {}
+
 /**
  * Wait (sleep) x seconds
  *
