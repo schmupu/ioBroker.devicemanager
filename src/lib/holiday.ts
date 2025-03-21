@@ -1,5 +1,5 @@
 import axios from 'axios';
-import sched from 'node-schedule';
+import * as sched from 'node-schedule';
 
 export interface ifHolidays {
     title: string;

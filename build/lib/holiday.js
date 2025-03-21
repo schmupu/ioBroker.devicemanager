@@ -32,7 +32,7 @@ __export(holiday_exports, {
 });
 module.exports = __toCommonJS(holiday_exports);
 var import_axios = __toESM(require("axios"));
-var import_node_schedule = __toESM(require("node-schedule"));
+var sched = __toESM(require("node-schedule"));
 class Holidays {
   static holdiays;
   static schedjob;
@@ -73,9 +73,9 @@ class Holidays {
    */
   static pollHolidays() {
     if (this.schedjob) {
-      import_node_schedule.default.cancelJob(this.schedjob);
+      sched.cancelJob(this.schedjob);
     }
-    this.schedjob = import_node_schedule.default.scheduleJob("1 0 * * *", async () => {
+    this.schedjob = sched.scheduleJob("1 0 * * *", async () => {
       await this.setHolidaysSet();
     });
   }

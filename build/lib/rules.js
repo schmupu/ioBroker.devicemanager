@@ -32,8 +32,8 @@ __export(rules_exports, {
   wait: () => wait
 });
 module.exports = __toCommonJS(rules_exports);
-var import_node_vm = __toESM(require("node:vm"));
-var import_suncalc = __toESM(require("suncalc"));
+var vm = __toESM(require("node:vm"));
+var SunCalc = __toESM(require("suncalc"));
 var import_holiday = require("./holiday");
 function wait(seconds) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1e3));
@@ -215,7 +215,7 @@ class Ruleset {
    */
   getTimefromSuncalc(time) {
     try {
-      const suncalc = import_suncalc.default.getTimes(/* @__PURE__ */ new Date(), this.latitude, this.longitude);
+      const suncalc = SunCalc.getTimes(/* @__PURE__ */ new Date(), this.latitude, this.longitude);
       const suncalctime = suncalc[time];
       return suncalctime.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     } catch (err) {
@@ -318,7 +318,7 @@ class Ruleset {
     }
     for (const rule of this.ruleset.rules) {
       try {
-        const result = import_node_vm.default.runInNewContext(rule.query, context);
+        const result = vm.runInNewContext(rule.query, context);
         if (result) {
           if (rule.name === this.ruleset.value.name) {
             return;
