@@ -34,6 +34,10 @@ module.exports = __toCommonJS(main_exports);
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_rules = require("./lib/rules");
 function wait(seconds) {
+  const i = 1;
+  if (i == 1) {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1e3));
+  }
   return new Promise((resolve) => setTimeout(resolve, seconds * 1e3));
 }
 function getErrorMessage(error) {
