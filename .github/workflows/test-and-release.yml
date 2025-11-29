@@ -85,7 +85,7 @@ jobs:
                   # Then uncomment and customize the following block:
                   # sentry: true
                   # sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-                  # sentry-project: "iobroker-devicmanager"
+                  # sentry-project: "iobroker-devicemanager"
                   # sentry-version-prefix: "iobroker.devicemanager"
                   # sentry-sourcemap-paths: "build/"
                   # If your sentry project is linked to a GitHub repository, you can enable the following option
