@@ -6,7 +6,6 @@
 // you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
 import type { ifruleset } from './lib/rules';
-// eslint-disable-next-line no-duplicate-imports
 import { Rulesets } from './lib/rules';
 
 // Load your modules here, e.g.:
