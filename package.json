@@ -9,7 +9,8 @@
     "homepage": "https://github.com/schmupu/ioBroker.devicemanager",
     "license": "MIT",
     "keywords": [
-        "device control"
+        "device control",
+        "ioBroker"
     ],
     "repository": {
         "type": "git",
@@ -19,7 +20,7 @@
         "node": ">= 20"
     },
     "dependencies": {
-        "@iobroker/adapter-core": "^3.2.3"
+        "@iobroker/adapter-core": "^3.3.2"
     },
     "devDependencies": {
         "@alcalzone/release-script": "^5.0.0",
