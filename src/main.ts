@@ -18,10 +18,6 @@ import { Rulesets } from './lib/rules';
  * @returns void
  */
 export function wait(seconds: number): Promise<void> {
-    const i = 1;
-    if (i == 1) {
-        return new Promise(resolve => setTimeout(resolve, seconds * 1000));
-    }
     return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
